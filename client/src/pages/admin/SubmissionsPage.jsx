@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import Sidebar from '../../components/admin/Sidebar';
 import SubmissionReviewModal from '../../components/admin/SubmissionReviewModal';
+import formatDate from '../../utils/formatDate';
 import { fetchAllSubmissions } from '../../api/submissions';
 
 const REVIEW_STATUS_CLASS = {
@@ -130,7 +131,7 @@ const SubmissionsPage = () => {
 
                       {/* Submitted at — raw ISO */}
                       <td className={`${tdCls} text-text-muted text-[13px] whitespace-nowrap`}>
-                        {sub.createdAt}
+                        {formatDate(sub.createdAt)}
                       </td>
 
                       {/* Review status */}
