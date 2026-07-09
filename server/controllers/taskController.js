@@ -39,11 +39,20 @@ const getTaskById = async (req, res) => {
 // @access Admin
 const createTask = async (req, res) => {
   const { title, description, status, assignedTo, dueDate } = req.body;
+  const normalizedTitle = typeof title === 'string' ? title.trim() : '';
+  const normalizedDescription =
+    typeof description === 'string' ? description.trim() : '';
+
+  if (!normalizedTitle || !normalizedDescription) {
+    return res.status(400).json({
+      message: 'Title and description are required',
+    });
+  }
 
   try {
     const task = await Task.create({
-      title,
-      description,
+      title: normalizedTitle,
+      description: normalizedDescription,
       status,
       assignedTo: assignedTo || null,
       dueDate,
@@ -52,6 +61,10 @@ const createTask = async (req, res) => {
 
     res.status(201).json(task);
   } catch (error) {
+    if (error.name === 'ValidationError') {
+      return res.status(400).json({ message: error.message });
+    }
+
     res.status(500).json({ message: error.message });
   }
 };
