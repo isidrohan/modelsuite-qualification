@@ -1,4 +1,5 @@
-﻿const Task = require('../models/Task');
+﻿const mongoose = require('mongoose');
+const Task = require('../models/Task');
 
 // @desc  Get all tasks
 // @route GET /api/tasks
@@ -18,15 +19,39 @@ const getAllTasks = async (req, res) => {
 
 // @desc  Get single task
 // @route GET /api/tasks/:id
-// @access Admin
+// @access Admin / Talent
 const getTaskById = async (req, res) => {
   try {
-    // — will throw a CastError from Mongoose instead of a clean 400
+    // Return a clean 400 instead of a CastError for invalid ObjectIds
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({ message: 'Invalid task ID' });
+    }
+
     const task = await Task.findById(req.params.id)
       .populate('assignedTo', 'name email')
       .populate('createdBy', 'name');
 
-    if (!task) return res.status(404).json({ message: 'Task not found' });
+    if (!task) {
+      return res.status(404).json({ message: 'Task not found' });
+    }
+
+    // Security Fix (Issue #7)
+    // Talents can only access:
+    // 1. Open tasks
+    // 2. Tasks assigned to themselves
+    if (req.user.role === 'Talent') {
+      const isAssigned =
+        task.assignedTo &&
+        task.assignedTo._id.toString() === req.user._id.toString();
+
+      const isOpen = task.status === 'Open';
+
+      if (!isAssigned && !isOpen) {
+        return res.status(403).json({
+          message: 'Access denied',
+        });
+      }
+    }
 
     res.json(task);
   } catch (error) {
@@ -39,12 +64,11 @@ const getTaskById = async (req, res) => {
 // @access Admin
 const createTask = async (req, res) => {
   const { title, description, status, assignedTo, dueDate } = req.body;
-  // Normalize user input before validation so whitespace-only values are rejected.
+
   const normalizedTitle = typeof title === 'string' ? title.trim() : '';
   const normalizedDescription =
     typeof description === 'string' ? description.trim() : '';
 
-  // Reject empty tasks before they reach the database and break the UI.
   if (!normalizedTitle || !normalizedDescription) {
     return res.status(400).json({
       message: 'Title and description are required',
@@ -77,8 +101,11 @@ const createTask = async (req, res) => {
 const updateTask = async (req, res) => {
   try {
     const task = await Task.findById(req.params.id);
-    if (!task) return res.status(404).json({ message: 'Task not found' });
-    // including internal fields like createdBy or __v
+
+    if (!task) {
+      return res.status(404).json({ message: 'Task not found' });
+    }
+
     const updated = await Task.findByIdAndUpdate(
       req.params.id,
       { ...req.body },
@@ -97,8 +124,11 @@ const updateTask = async (req, res) => {
 const deleteTask = async (req, res) => {
   try {
     const task = await Task.findById(req.params.id);
-    if (!task) return res.status(404).json({ message: 'Task not found' });
-    // — orphaned Submission documents remain in DB after task deletion
+
+    if (!task) {
+      return res.status(404).json({ message: 'Task not found' });
+    }
+
     await Task.findByIdAndDelete(req.params.id);
 
     res.json({ message: 'Task deleted' });
@@ -107,4 +137,10 @@ const deleteTask = async (req, res) => {
   }
 };
 
-module.exports = { getAllTasks, getTaskById, createTask, updateTask, deleteTask };
+module.exports = {
+  getAllTasks,
+  getTaskById,
+  createTask,
+  updateTask,
+  deleteTask,
+};
