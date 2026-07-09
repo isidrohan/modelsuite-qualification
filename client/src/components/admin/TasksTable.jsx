@@ -1,4 +1,5 @@
 import { deleteTask } from '../../api/tasks';
+import formatDate from '../../utils/formatDate';
 
 /* ── SVG Action Icons ── */
 const IconEdit = () => (
@@ -22,15 +23,6 @@ const AVATAR_COLORS = [
 ];
 const getAvatarGradient = (name = '') => AVATAR_COLORS[name.charCodeAt(0) % AVATAR_COLORS.length];
 
-/* ── Date formatter ── */
-const fmtDate = (raw) => {
-  if (!raw) return '—';
-  try {
-    const d = new Date(raw);
-    if (isNaN(d)) return raw;
-    return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-  } catch { return raw; }
-};
 
 /* ── Status badge class ── */
 const STATUS_CLASS = {
@@ -41,15 +33,30 @@ const STATUS_CLASS = {
   Rejected:  'status-badge-Rejected',
 };
 
-const TasksTable = ({ tasks, onEdit, onRefresh }) => {
+import { useState } from 'react';
+import ConfirmModal from '../common/ConfirmModal';
 
-  const handleDelete = async (id) => {
+const TasksTable = ({ tasks, onEdit, onRefresh }) => {
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [confirmTarget, setConfirmTarget] = useState(null);
+
+  const handleDeleteConfirmed = async () => {
+    if (!confirmTarget) return setConfirmOpen(false);
     try {
-      await deleteTask(id);
+      await deleteTask(confirmTarget._id);
+      setConfirmOpen(false);
+      setConfirmTarget(null);
       onRefresh();
     } catch {
+      setConfirmOpen(false);
+      setConfirmTarget(null);
       alert('Failed to delete task');
     }
+  };
+
+  const requestDelete = (task) => {
+    setConfirmTarget(task);
+    setConfirmOpen(true);
   };
 
   if (tasks.length === 0) {
@@ -127,12 +134,12 @@ const TasksTable = ({ tasks, onEdit, onRefresh }) => {
 
               {/* Due date */}
               <td className="table-td" style={{ color: '#6B7280', whiteSpace: 'nowrap' }}>
-                {fmtDate(task.dueDate)}
+                {formatDate(task.dueDate)}
               </td>
 
               {/* Created */}
               <td className="table-td" style={{ color: '#4B5563', whiteSpace: 'nowrap', fontSize: '12.5px' }}>
-                {fmtDate(task.createdAt)}
+                {formatDate(task.createdAt)}
               </td>
 
               {/* Actions */}
@@ -145,7 +152,7 @@ const TasksTable = ({ tasks, onEdit, onRefresh }) => {
                     <IconEdit />
                   </button>
                   <button
-                    onClick={() => handleDelete(task._id)}
+                    onClick={() => requestDelete(task)}
                     title="Delete task"
                     className="action-btn action-btn-delete">
                     <IconDelete />
@@ -156,6 +163,14 @@ const TasksTable = ({ tasks, onEdit, onRefresh }) => {
           ))}
         </tbody>
       </table>
+      <ConfirmModal
+        open={confirmOpen}
+        title="Delete task"
+        message={confirmTarget ? `Delete "${confirmTarget.title}"? This action cannot be undone.` : ''}
+        confirmText="Delete"
+        onConfirm={handleDeleteConfirmed}
+        onCancel={() => { setConfirmOpen(false); setConfirmTarget(null); }}
+      />
     </div>
   );
 };

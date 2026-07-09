@@ -1,5 +1,7 @@
-﻿import { reviewSubmission } from '../../api/submissions';
+﻿import { useState } from 'react';
+import { reviewSubmission } from '../../api/submissions';
 import formatDate from '../../utils/formatDate';
+import ConfirmModal from '../common/ConfirmModal';
 
 const REVIEW_STATUS_CLASS = {
   Pending:  'status-badge-Submitted',
@@ -17,6 +19,13 @@ const SubmissionReviewModal = ({ submission, onClose, onReviewed }) => {
     } catch (err) {
       alert(err.response?.data?.message || 'Review action failed');
     }
+  };
+
+  const [confirmRejectOpen, setConfirmRejectOpen] = useState(false);
+
+  const onConfirmReject = async () => {
+    setConfirmRejectOpen(false);
+    await handleReview('Rejected');
   };
 
   const task   = submission.taskId   || {};
@@ -106,7 +115,7 @@ const SubmissionReviewModal = ({ submission, onClose, onReviewed }) => {
               className="flex-1 py-2.5 bg-bg-input text-text-muted border border-border rounded-lg text-sm font-medium cursor-pointer hover:bg-bg-hover hover:text-text-primary transition-all font-sans">
               Cancel
             </button>
-            <button onClick={() => handleReview('Rejected')}
+            <button onClick={() => setConfirmRejectOpen(true)}
               className="flex-1 py-2.5 bg-danger/10 text-danger border border-danger/30 rounded-lg text-sm font-semibold cursor-pointer hover:bg-danger/20 transition-all font-sans">
               ✕ Reject
             </button>
@@ -117,6 +126,14 @@ const SubmissionReviewModal = ({ submission, onClose, onReviewed }) => {
           </div>
         </div>
       </div>
+      <ConfirmModal
+        open={confirmRejectOpen}
+        title="Reject submission"
+        message="Are you sure you want to reject this submission? This action can be undone by re-reviewing."
+        confirmText="Reject"
+        onConfirm={onConfirmReject}
+        onCancel={() => setConfirmRejectOpen(false)}
+      />
     </div>
   );
 };
