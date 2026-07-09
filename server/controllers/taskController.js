@@ -39,10 +39,12 @@ const getTaskById = async (req, res) => {
 // @access Admin
 const createTask = async (req, res) => {
   const { title, description, status, assignedTo, dueDate } = req.body;
+  // Normalize user input before validation so whitespace-only values are rejected.
   const normalizedTitle = typeof title === 'string' ? title.trim() : '';
   const normalizedDescription =
     typeof description === 'string' ? description.trim() : '';
 
+  // Reject empty tasks before they reach the database and break the UI.
   if (!normalizedTitle || !normalizedDescription) {
     return res.status(400).json({
       message: 'Title and description are required',

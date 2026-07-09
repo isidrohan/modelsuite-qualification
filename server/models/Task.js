@@ -3,11 +3,13 @@ const taskSchema = new mongoose.Schema(
   {
     title: {
       type: String,
+      // Schema-level backstop: empty or whitespace-only titles are invalid.
       required: [true, 'Title is required'],
       trim: true,
     },
     description: {
       type: String,
+      // Keep descriptions non-empty even if a task is created outside this controller.
       required: [true, 'Description is required'],
       trim: true,
     },
