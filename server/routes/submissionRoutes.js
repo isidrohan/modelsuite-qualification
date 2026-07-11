@@ -1,6 +1,6 @@
 ﻿const express = require('express');
 const router = express.Router();
-const { submitTask, getSubmission, getAllSubmissions, reviewSubmission } = require('../controllers/submissionController');
+const { submitTask, getSubmission, getAllSubmissions, reviewSubmission, getSubmissionHistory } = require('../controllers/submissionController');
 const { protect, adminOnly } = require('../middleware/authMiddleware');
 const upload = require('../middleware/upload');
 
@@ -10,6 +10,9 @@ router.put('/:id/review', protect, adminOnly, reviewSubmission);
 
 // ── Talent routes ──
 // so the file is saved to disk even if the request is later rejected
+
+router.get('/history', protect, getSubmissionHistory);
+
 router.post('/:taskId', protect, upload.single('file'), submitTask);
 router.get('/:taskId', protect, getSubmission);
 

@@ -18,6 +18,14 @@ const IconTasks = () => (
   </svg>
 );
 
+const IconHistory = () => (
+  <svg className="nav-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M4 6v4h4"/>
+    <path d="M4.5 9.5A6.5 6.5 0 1 0 6 4"/>
+    <path d="M10 6v4l3 2"/>
+  </svg>
+);
+
 const IconLogout = () => (
   <svg width="15" height="15" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
     <path d="M13 10H3M13 10l-3-3M13 10l-3 3"/>
@@ -28,6 +36,7 @@ const IconLogout = () => (
 const navItems = [
   { label: 'My Dashboard', path: '/talent/dashboard', Icon: IconDashboard },
   { label: 'My Tasks',     path: '/talent/tasks',     Icon: IconTasks     },
+  { label: 'History',      path: '/talent/history',   Icon: IconHistory   },
 ];
 
 const TalentSidebar = () => {
@@ -36,7 +45,7 @@ const TalentSidebar = () => {
   const location  = useLocation();
 
   return (
-    <aside className="fixed inset-y-0 left-0 w-[220px] flex flex-col z-50"
+    <aside className="fixed inset-y-0 left-0 w-55 flex flex-col z-50"
       style={{ background: '#0D0D0D' }}>
 
       {/* Brand */}
@@ -75,7 +84,7 @@ const TalentSidebar = () => {
               {user?.name?.[0]?.toUpperCase() ?? 'T'}
             </div>
             <div className="min-w-0">
-              <p className="text-[13px] font-semibold truncate max-w-[100px]"
+              <p className="text-[13px] font-semibold truncate max-w-25"
                 style={{ color: '#E5E2E1', fontFamily: 'Inter, sans-serif' }}>
                 {user?.name}
               </p>

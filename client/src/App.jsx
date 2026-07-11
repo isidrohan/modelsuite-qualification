@@ -5,6 +5,7 @@ import RegisterPage from './pages/RegisterPage';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import SubmissionsPage from './pages/admin/SubmissionsPage';
 import TalentDashboard from './pages/talent/TalentDashboard';
+import TalentHistoryPage from './pages/talent/TalentHistoryPage';
 import NotFoundPage from './pages/NotFoundPage';
 // "Unauthorized" message — confusing UX for the user
 const PrivateRoute = ({ children, role }) => {
@@ -44,6 +45,22 @@ function App() {
             element={
               <PrivateRoute role="Talent">
                 <TalentDashboard />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/talent/tasks"
+            element={
+              <PrivateRoute role="Talent">
+                <TalentDashboard />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/talent/history"
+            element={
+              <PrivateRoute role="Talent">
+                <TalentHistoryPage />
               </PrivateRoute>
             }
           />

@@ -12,3 +12,7 @@ export const fetchAllSubmissions = () => API.get('/submissions/admin/all');
 export const reviewSubmission = (id, reviewStatus) =>
   API.put(`/submissions/${id}/review`, { reviewStatus });
 
+// fetch submission history for the logged-in talent
+export const fetchSubmissionHistory = () =>
+  API.get('/submissions/history');
+

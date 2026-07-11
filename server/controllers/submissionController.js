@@ -105,4 +105,22 @@ const reviewSubmission = async (req, res) => {
   }
 };
 
-module.exports = { submitTask, getSubmission, getAllSubmissions, reviewSubmission };
+// @desc Get submission history for logged-in talent
+// @route GET /api/submissions/history
+// @access Talent
+const getSubmissionHistory = async (req, res) => {
+  try {
+    const submissions = await Submission.find({
+      talentId: req.user._id,
+      reviewStatus: { $in: ['Approved', 'Rejected'] },
+    })
+      .populate('taskId', 'title')
+      .sort({ updatedAt: -1 });
+
+    res.json(submissions);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+module.exports = { submitTask, getSubmission, getAllSubmissions, reviewSubmission, getSubmissionHistory };
